@@ -1,0 +1,27 @@
+{
+  "name": "stupidverse-v4",
+  "version": "1.0.0",
+  "description": "Hey! this is a simple frontend for my stupid little project Stupidverse, mess around with it or something idk!",
+  "main": "server.js",
+  "scripts": {
+    "test": "node .",
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "express-session": "^1.18.0",
+    "multer": "^1.4.5-lts.1",
+    "node-fetch": "^3.3.2",
+    "request": "^2.88.2",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "@pretendonetwork/wiiu-browser-types": "^1.0.0",
+    "@pretendonetwork/wiiu-memo-types": "^1.0.0",
+    "prettier-plugin-ejs": "^1.0.3"
+  }
+}

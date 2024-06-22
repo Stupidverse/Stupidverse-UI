@@ -1,0 +1,33 @@
+* = unlikley but *might* happen (dont get your hopes up)
+
+1. Communites for Wii U, 3DS, and *Switch
+
+2. Posting in communites
+
+3. Admin Panel
+ - Allow banning users from the panel
+ - Allow verifying users from the panel (gives the miiverse check but with a pink recolor)
+ - Allow muting users from the panel
+ - Verified users are mods
+
+4. Allow mods to moderate the communites
+ - Allow mods to delete posts from a drop down on every post
+
+5. Allow users to delete their own posts
+ - Assaign every post a post id and when the post is clicked it takes you too /community-name/posts/postid
+
+6. Assaign every account a user id and when their mii (profile picture) or name is clicked on it takes you too /userid
+
+7. * Add the Wii U Miiverse nav-bar 
+
+8. Make it look simillar to the Wii U's Miiverse on the main page
+ * - /3ds will look simillar to the 3ds page and /desktop will be like the original miiverse webstite
+
+9. Add account creation
+ - After an account is made the user must make a mii that will be used on the *nav bar* for the user icon and their profile picture
+
+10. Yeahing Posts
+
+11. Reposting feature simillar to twiiter (X)
+
+12. Get devs because i cant figure out how to do this by myself 💀
