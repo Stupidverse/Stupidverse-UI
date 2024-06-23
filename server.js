@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 const path = require("path");
 const sqlite3 = require("sqlite3").verbose();
 const session = require("express-session");
+const vhost = require("vhost");
 
 // Set the path for the SQLite database file
 const dbPath = path.join(__dirname, "database.db");
@@ -67,9 +68,6 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "public/views"));
 
 app.use(bodyParser.urlencoded({ extended: true }));
-
-// Serve static files from the 'public' directory
-app.use(express.static(path.join(__dirname, "public")));
 
 // Middleware to check setup completion
 app.use((req, res, next) => {
@@ -152,7 +150,7 @@ app.get("/login", (req, res) => {
 });
 
 app.get("/user-settings", ensureLoggedIn, (req, res) => {
-    res.render("user-settings", { username: req.session.username });
+  res.render("user-settings", { username: req.session.username });
 });
 
 // Handle login form submission
@@ -198,12 +196,6 @@ app.get("/", (req, res) => {
   res.redirect("/communities");
 });
 
-const PORT = process.env.PORT || 80;
-const HOST = "0.0.0.0"; // Listen on all network interfaces
-app.listen(PORT, HOST, () => {
-  console.log(`Portal server is running on http://${HOST}:${PORT}`);
-});
-
 // Function to generate a unique 7-digit random ID
 function generateUniqueId(callback) {
   const userId = Math.floor(1000000 + Math.random() * 9000000).toString();
@@ -221,3 +213,29 @@ function generateUniqueId(callback) {
     }
   });
 }
+
+// Middleware to serve static files for the subdomains
+const portalApp = express();
+portalApp.use(express.static(path.join(__dirname, "public/portal")));
+portalApp.set("view engine", "ejs");
+portalApp.set("views", path.join(__dirname, "public/views"));
+
+const ctrApp = express();
+ctrApp.use(express.static(path.join(__dirname, "public/ctr")));
+ctrApp.set("view engine", "ejs");
+ctrApp.set("views", path.join(__dirname, "public/views"));
+
+const offDeviceApp = express();
+offDeviceApp.use(express.static(path.join(__dirname, "public/offdevice")));
+offDeviceApp.set("view engine", "ejs");
+offDeviceApp.set("views", path.join(__dirname, "public/views"));
+
+app.use(vhost('portal.olv.stupidverse.xyz', portalApp));
+app.use(vhost('ctr.olv.stupidverse.xyz', ctrApp));
+app.use(vhost('stupidverse.xyz', offDeviceApp));
+
+const PORT = process.env.PORT || 80;
+const HOST = "0.0.0.0"; // Listen on all network interfaces
+app.listen(PORT, HOST, () => {
+  console.log(`Portal server is running on http://${HOST}:${PORT}`);
+});

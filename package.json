@@ -17,7 +17,8 @@
     "multer": "^1.4.5-lts.1",
     "node-fetch": "^3.3.2",
     "request": "^2.88.2",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "vhost": "^3.0.2"
   },
   "devDependencies": {
     "@pretendonetwork/wiiu-browser-types": "^1.0.0",
