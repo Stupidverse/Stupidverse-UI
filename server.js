@@ -64,9 +64,6 @@ app.use(
   }),
 );
 
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "public/views"));
-
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Middleware to check setup completion
@@ -218,21 +215,21 @@ function generateUniqueId(callback) {
 const portalApp = express();
 portalApp.use(express.static(path.join(__dirname, "public/portal")));
 portalApp.set("view engine", "ejs");
-portalApp.set("views", path.join(__dirname, "public/views"));
+portalApp.set("views", path.join(__dirname, "public/portal/views"));
 
 const ctrApp = express();
 ctrApp.use(express.static(path.join(__dirname, "public/ctr")));
 ctrApp.set("view engine", "ejs");
-ctrApp.set("views", path.join(__dirname, "public/views"));
+ctrApp.set("views", path.join(__dirname, "public/ctr/views"));
 
 const offDeviceApp = express();
 offDeviceApp.use(express.static(path.join(__dirname, "public/offdevice")));
 offDeviceApp.set("view engine", "ejs");
-offDeviceApp.set("views", path.join(__dirname, "public/views"));
+offDeviceApp.set("views", path.join(__dirname, "public/offdevice/views"));
 
-app.use(vhost('portal.olv.stupidverse.xyz', portalApp));
-app.use(vhost('ctr.olv.stupidverse.xyz', ctrApp));
-app.use(vhost('stupidverse.xyz', offDeviceApp));
+app.use(vhost('portal.olv.localhost', portalApp));
+app.use(vhost('ctr.olv.localhost', ctrApp));
+app.use(vhost('localhost', offDeviceApp));
 
 const PORT = process.env.PORT || 80;
 const HOST = "0.0.0.0"; // Listen on all network interfaces
