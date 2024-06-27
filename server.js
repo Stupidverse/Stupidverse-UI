@@ -4,6 +4,8 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
 const session = require('express-session');
+const bcrypt = require('bcrypt');
+require('dotenv').config();
 
 // Set the path for the SQLite database file
 const dbPath = path.join(__dirname, 'database.db');
@@ -57,15 +59,18 @@ db.serialize(() => {
 // Set up session middleware
 app.use(
   session({
-    secret: 'your-secret-key',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
   })
 );
 
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'public/views'));
 
+// Set paths for the different views
+app.set('views', path.join(__dirname, 'public'));
+
+// Middleware to parse the body of POST requests
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Serve static files from the 'public' directory
@@ -94,6 +99,34 @@ function ensureLoggedIn(req, res, next) {
   next();
 }
 
+// Middleware to handle subdomains
+app.use((req, res, next) => {
+  const host = req.headers.host;
+  if (host.startsWith('portal.')) {
+    req.subdomain = 'portal';
+  } else if (host.startsWith('ctr.')) {
+    req.subdomain = 'ctr';
+  } else if (host.startsWith('web.') || host === 'localhost') {
+    req.subdomain = 'web';
+  } else {
+    req.subdomain = null;
+  }
+  next();
+});
+
+// Route handlers
+app.get('/', (req, res) => {
+  if (req.subdomain === 'portal') {
+    res.render('portal/views/communities');
+  } else if (req.subdomain === 'ctr') {
+    res.render('ctr/views/ctr');
+  } else if (req.subdomain === 'web') {
+    res.render('web/views/web');
+  } else {
+    res.redirect('/communities');
+  }
+});
+
 // Serve the setup page
 app.get('/setup', (req, res) => {
   db.get('SELECT setupCompleted FROM settings', (err, row) => {
@@ -103,7 +136,7 @@ app.get('/setup', (req, res) => {
     } else if (row && row.setupCompleted) {
       res.redirect('/login'); // If setup is already completed, redirect to login
     } else {
-      res.render('setup');
+      res.render('portal/views/setup');
     }
   });
 });
@@ -120,82 +153,86 @@ app.post('/setup', (req, res) => {
       return;
     }
 
-    // Insert the user into the database
-    db.run(
-      'INSERT INTO users (userId, username, password, gameLevel) VALUES (?, ?, ?, ?)',
-      [userId, username, password, gameLevel],
-      function (err) {
-        if (err) {
-          console.error('Error creating user:', err.message);
-          res.status(500).send('Error creating user.');
-        } else {
-          // Update the setupCompleted flag in the settings table
-          db.run('UPDATE settings SET setupCompleted = 1', (err) => {
+    // Hash the password before storing it
+    bcrypt.hash(password, 10, (err, hash) => {
+      if (err) {
+        console.error('Error hashing password:', err.message);
+        res.status(500).send('Error creating user.');
+      } else {
+        // Insert the user into the database
+        db.run(
+          'INSERT INTO users (userId, username, password, gameLevel) VALUES (?, ?, ?, ?)',
+          [userId, username, hash, gameLevel],
+          function (err) {
             if (err) {
-              console.error('Error updating setup status:', err.message);
-              res.status(500).send('Error updating setup status.');
+              console.error('Error creating user:', err.message);
+              res.status(500).send('Error creating user.');
             } else {
-              req.session.username = username;
-              req.session.userId = userId;
-              res.redirect('/communities');
+              // Update the setupCompleted flag in the settings table
+              db.run('UPDATE settings SET setupCompleted = 1', (err) => {
+                if (err) {
+                  console.error('Error updating setup status:', err.message);
+                  res.status(500).send('Error updating setup status.');
+                } else {
+                  req.session.username = username;
+                  req.session.userId = userId;
+                  res.redirect('/communities');
+                }
+              });
             }
-          });
-        }
+          }
+        );
       }
-    );
+    });
   });
 });
 
 // Serve the login page
 app.get('/login', (req, res) => {
-  res.render('login');
+  res.render('portal/views/login');
 });
 
-app.get('/user-settings', ensureLoggedIn, (req, res) => {
-  res.render('user-settings', { username: req.session.username });
-});
-
-// Handle login form submission
 app.post('/login', (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
 
   // Check if user exists in the database
-  db.get(
-    'SELECT * FROM users WHERE username = ? AND password = ?',
-    [username, password],
-    (err, row) => {
-      if (err) {
-        console.error('Error logging in:', err.message);
-        res.status(500).send('Error logging in.');
-      } else if (row) {
-        // User logged in successfully
-        console.log(`User logged in successfully: ${username}`);
-        // Store the username in a session variable
-        req.session.username = username;
-        req.session.userId = row.userId;
-        // Redirect to /communities after successful login
-        res.redirect('/communities');
-      } else {
-        res.status(401).send('Invalid username or password.');
-      }
+  db.get('SELECT * FROM users WHERE username = ?', [username], (err, row) => {
+    if (err) {
+      console.error('Error logging in:', err.message);
+      res.status(500).send('Error logging in.');
+    } else if (row) {
+      // Compare the provided password with the hashed password
+      bcrypt.compare(password, row.password, (err, result) => {
+        if (err) {
+          console.error('Error comparing password:', err.message);
+          res.status(500).send('Error logging in.');
+        } else if (result) {
+          // User logged in successfully
+          console.log(`User logged in successfully: ${username}`);
+          // Store the username in a session variable
+          req.session.username = username;
+          req.session.userId = row.userId;
+          // Redirect to /communities after successful login
+          res.redirect('/communities');
+        } else {
+          res.status(401).send('Invalid username or password.');
+        }
+      });
+    } else {
+      res.status(401).send('Invalid username or password.');
     }
-  );
+  });
 });
 
 // Serve the communities page
 app.get('/communities', ensureLoggedIn, (req, res) => {
-  res.render('communities', { username: req.session.username });
+  res.render('portal/views/communities', { username: req.session.username });
 });
 
 // Endpoint to get the username of the logged-in user
 app.get('/get-username', ensureLoggedIn, (req, res) => {
   res.json({ username: req.session.username });
-});
-
-// Redirect from root path to communities page
-app.get('/', (req, res) => {
-  res.redirect('/communities');
 });
 
 const PORT = process.env.PORT || 80;

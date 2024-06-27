@@ -1,4 +1,3 @@
 node_modules
 database.db
-certs/cert.pem
-certs/key.pem
+.env
