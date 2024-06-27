@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Setup - Miiverse Clone</title>
+    <style>
+      .step {
+        display: none;
+      }
+
+      .step.active {
+        display: block;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="step1" class="step active">
+      <h1>Welcome to Stupidverse!</h1>
+      <p>
+        Stupidverse is a gaming community that connects people from all over the
+        world using Mii characters. Use Stupidverse to share your gaming
+        experiences and meet people from around the world
+      </p>
+      <button>Close</button>
+      <button onclick="nextStep()">Next</button>
+    </div>
+
+    <div id="step2" class="step">
+      <h1>What is Stupidverse?</h1>
+      <p>
+        Stupidverse is a tiny clone of Miiverse that I decided to work on
+        because I was bored. Eventually you'll be able to post, draw, and share
+        content with others using this platform!
+      </p>
+      <button>Back</button>
+      <button onclick="nextStep()">Next</button>
+    </div>
+
+    <div id="step3" class="step">
+      <h1>Stupidverse Manners</h1>
+      <hr />
+      <p>
+        I'm honestly too lazy to write this right now but like if you do bad
+        stuff you're probally gonna get banned so like don't I guess!
+      </p>
+      <button>Read Stupidverse Code of Conduct</button>
+      <p>Do you agree to abide by the Stupidverse Code of Conduct?</p>
+      <button>I Do Not Agree</button>
+      <button onclick="nextStep()">I Agree</button>
+    </div>
+
+    <div id="step4" class="step">
+      <h2>Create Your Account</h2>
+      <form id="setupForm" action="/setup" method="POST">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required /><br />
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required /><br />
+
+        <label for="gameLevel">Game Level:</label>
+        <select id="gameLevel" name="gameLevel" required>
+          <option value="beginner">Beginner</option>
+          <option value="intermediate">Intermediate</option>
+          <option value="expert">Expert</option></select
+        ><br />
+
+        <button type="submit">Create Account</button>
+      </form>
+    </div>
+
+    <div id="step5" class="step">
+      <h1>Ready to Start Using Stupidverse</h1>
+      <hr />
+      <p>
+        First, check out some communities and see what people from all over the
+        world are posting about. Take this opportunity to familiarize yourself
+        with Stupidverse. You might make some new discoveries along the way!
+      </p>
+      <button onclick="nextStep()">Next</button>
+    </div>
+
+    <div id="step6" class="step">
+      <h1>Have fun in Stupidverse!</h1>
+      <hr />
+      <button href="/communities">Start</button>
+    </div>
+
+    <script>
+      let currentStep = 1;
+
+      function nextStep() {
+        document
+          .getElementById(`step${currentStep}`)
+          .classList.remove("active");
+        currentStep++;
+        document.getElementById(`step${currentStep}`).classList.add("active");
+      }
+    </script>
+  </body>
+</html>

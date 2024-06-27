@@ -1,0 +1,3 @@
+CTR = 3DS UI
+Portal = Wii U UI
+Web = The off device webite
